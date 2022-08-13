@@ -24,7 +24,7 @@ pip install -r requirements.txt
 - hh.ru не требует аутентификации
 - запустите файл командой:
 ```
-python3 fetch_spacex_images.py --launch_number=number
+python3 HH_and_Super_Job.py
 ``` 
 ## Цели проекта
 
