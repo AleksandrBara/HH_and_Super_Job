@@ -83,7 +83,10 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
                     salary_in_vacancies.append(avg_salary)
             extra_pages = vacancies['more']
             page += 1
-        average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
+        if len(salary_in_vacancies) != 0:
+            average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
+        else:
+            average_salary = 0
         vacancies_found = vacancies['total']
         vacancies_processed = len(salary_in_vacancies)
         average_salary_analytics = {
@@ -115,7 +118,10 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
                 if mean_salary:
                     salary_in_vacancies.append(mean_salary)
             page += 1
-        average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
+        if len(salary_in_vacancies) != 0:
+            average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
+        else:
+            average_salary = 0
         vacancies_found = vacancies['found']
         vacancies_processed = len(salary_in_vacancies)
         average_salary_analytics = {
