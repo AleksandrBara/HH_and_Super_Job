@@ -24,7 +24,7 @@ pip install -r requirements.txt
 - hh.ru не требует аутентификации
 - запустите файл командой:
 ```
-python3 HH_and_Super_Job.py
+python3 HH_and_SJob.py
 ``` 
 ## Цели проекта
 
