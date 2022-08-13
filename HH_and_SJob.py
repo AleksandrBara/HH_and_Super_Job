@@ -114,9 +114,9 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
             hh_paload['page'] = page
             vacancies = get_vacancies(hh_api_url, hh_paload, hh_headers)
             for vacancy in vacancies['items']:
-                mean_salary = predict_rub_salary_hh(vacancy)
-                if mean_salary:
-                    salary_in_vacancies.append(mean_salary)
+                avg_salary = predict_rub_salary_hh(vacancy)
+                if avg_salary:
+                    salary_in_vacancies.append(avg_salary)
             page += 1
         if len(salary_in_vacancies) != 0:
             average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
