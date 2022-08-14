@@ -70,11 +70,11 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
             'keywords': 'Программист {}'.format(language),
             'town': 'Москва',
             'page': '0',
-            'count': '50'
+            'count': '3'
         }
         page = 0
         extra_pages = True
-        while extra_pages != False:
+        while extra_pages :
             sjob_payload['page'] = page
             vacancies = get_vacancies(sjob_api_url, sjob_payload, sjob_headers)
             for vacancy in vacancies['objects']:
@@ -94,7 +94,7 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
             'vacancies_processed': vacancies_processed,
             'average_salary': average_salary
         }
-        salary_analytics.update({language: average_salary_analytics})
+        salary_analytics[language] = average_salary_analytics
     return salary_analytics
 
 
@@ -129,7 +129,7 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
             'vacancies_processed': vacancies_processed,
             'average_salary': average_salary
         }
-        salary_analytics.update({language: average_salary_analytics})
+        salary_analytics[language] = average_salary_analytics
     return salary_analytics
 
 
