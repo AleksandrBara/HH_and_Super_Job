@@ -66,7 +66,7 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
     salary_analytics = {}
     for language in languages:
         salary_in_vacancies = []
-        sjob_paload = {
+        sjob_payload = {
             'keywords': 'Программист {}'.format(language),
             'town': 'Москва',
             'page': '0',
@@ -75,18 +75,18 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
         page = 0
         extra_pages = True
         while extra_pages != False:
-            sjob_paload['page'] = page
-            vacancies = get_vacancies(sjob_api_url, sjob_paload, sjob_headers)
+            sjob_payload['page'] = page
+            vacancies = get_vacancies(sjob_api_url, sjob_payload, sjob_headers)
             for vacancy in vacancies['objects']:
                 avg_salary = predict_rub_salary_sj(vacancy)
                 if avg_salary:
                     salary_in_vacancies.append(avg_salary)
             extra_pages = vacancies['more']
             page += 1
-        if len(salary_in_vacancies) != 0:
-            average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
-        else:
+        if not len(salary_in_vacancies):
             average_salary = 0
+        else:
+            average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
         vacancies_found = vacancies['total']
         vacancies_processed = len(salary_in_vacancies)
         average_salary_analytics = {
@@ -102,26 +102,26 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
     salary_analytics = {}
     for language in languages:
         salary_in_vacancies = []
-        hh_paload = {
+        hh_payload = {
             'text': 'Программист {}'.format(language),
             'period': '30',
             'area': '2',
             'page': '0'
         }
-        quantity_of_pages = get_vacancies(hh_api_url, hh_paload, hh_headers)['pages']
+        quantity_of_pages = get_vacancies(hh_api_url, hh_payload, hh_headers)['pages']
         page = 0
         while page < quantity_of_pages:
-            hh_paload['page'] = page
-            vacancies = get_vacancies(hh_api_url, hh_paload, hh_headers)
+            hh_payload['page'] = page
+            vacancies = get_vacancies(hh_api_url, hh_payload, hh_headers)
             for vacancy in vacancies['items']:
                 avg_salary = predict_rub_salary_hh(vacancy)
                 if avg_salary:
                     salary_in_vacancies.append(avg_salary)
             page += 1
-        if len(salary_in_vacancies) != 0:
-            average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
-        else:
+        if not len(salary_in_vacancies):
             average_salary = 0
+        else:
+            average_salary = int(sum(salary_in_vacancies) / len(salary_in_vacancies))
         vacancies_found = vacancies['found']
         vacancies_processed = len(salary_in_vacancies)
         average_salary_analytics = {
@@ -136,7 +136,7 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
 def render_vacancy_table(analytics, title):
     vacancy_table = [
         [
-            ' Язык программирования ',
+            'Язык программирования',
             'Вакансий найдено',
             'Вакансий обработано ',
             'Средняя зарплата'
