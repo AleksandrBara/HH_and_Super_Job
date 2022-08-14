@@ -69,8 +69,8 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
         sjob_payload = {
             'keywords': 'Программист {}'.format(language),
             'town': 'Москва',
-            'page': '0',
-            'count': '3'
+            'page': '{}'.format(first_page_number),
+            'count': '{}'.format(number_of_results_per_page)
         }
         page = 0
         extra_pages = True
@@ -104,11 +104,11 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
         salary_in_vacancies = []
         hh_payload = {
             'text': 'Программист {}'.format(language),
-            'period': '30',
-            'area': '2',
-            'page': '0'
+            'period': '{}'.format(period_of_searching),
+            'area': '{}'.format(city_name),
+            'page': '{}'.format(first_page_number)
         }
-        quantity_of_pages = get_vacancies(hh_api_url, hh_payload, hh_headers)['pages']
+        quantity_of_pages = 1
         page = 0
         while page < quantity_of_pages:
             hh_payload['page'] = page
@@ -118,6 +118,7 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
                 if avg_salary:
                     salary_in_vacancies.append(avg_salary)
             page += 1
+            quantity_of_pages = vacancies['pages']
         if not len(salary_in_vacancies):
             average_salary = 0
         else:
@@ -171,6 +172,10 @@ if __name__ == '__main__':
         'Java',
         'JavaScript'
     ]
+    first_page_number = 0
+    city_name = 2
+    period_of_searching = 30
+    number_of_results_per_page = 50
     try:
         hh_analytics = get_analytics_from_hh(languages, hh_api_url, hh_headers)
         sjob_analytics = get_analytics_from_sjob(languages, sjob_api_url, sjob_headers)
