@@ -11,7 +11,7 @@ def get_vacancies(api_url, payload, headers):
 
 
 def predict_salary(salary_from, salary_to):
-    if salary_from == None and salary_to == None:
+    if not salary_from and not salary_to:
         avg_salary = None
     elif salary_from and salary_to:
         avg_salary = float(salary_from + salary_to) / 2
@@ -23,43 +23,33 @@ def predict_salary(salary_from, salary_to):
 
 
 def predict_rub_salary_hh(vacancy):
-    if vacancy['salary'] == None:
-        salary_from = None
-        salary_to = None
-    elif vacancy['salary']['currency'] != 'RUR':
-        salary_from = None
-        salary_to = None
-    elif vacancy['salary']['from'] and vacancy['salary']['to']:
-        salary_from = vacancy['salary']['from']
-        salary_to = vacancy['salary']['to']
-    elif vacancy['salary']['from'] and not vacancy['salary']['to']:
-        salary_from = vacancy['salary']['from']
-        salary_to = None
-    elif vacancy['salary']['to'] and not vacancy['salary']['from']:
-        salary_from = None
-        salary_to = vacancy['salary']['to']
-    avg_salary = predict_salary(salary_from, salary_to)
-    return avg_salary
+    if vacancy['salary']:
+        if vacancy['salary']['from']:
+            salary_from = vacancy['salary']['from']
+        if vacancy['salary']['to']:
+            salary_to = vacancy['salary']['to']
+        if not vacancy['salary']['to']:
+            salary_to = None
+        if not vacancy['salary']['from']:
+            salary_from = None
+        if vacancy['salary']['currency'] != 'RUR':
+            salary_from = None
+            salary_to = None
+        return salary_from, salary_to
+    else:
+        return None, None
 
 
 def predict_rub_salary_sj(vacancy):
-    if vacancy['payment_from'] == None and vacancy['payment_to'] == None:
-        salary_from = None
-        salary_to = None
-    elif vacancy['payment_from'] == 0 and vacancy['payment_to'] == 0:
-        salary_from = None
-        salary_to = None
-    elif vacancy['payment_from'] and vacancy['payment_to']:
+    if vacancy['payment_from']:
         salary_from = vacancy['payment_from']
+    if vacancy['payment_to']:
         salary_to = vacancy['payment_to']
-    elif vacancy['payment_from'] and not vacancy['payment_to']:
-        salary_from = vacancy['payment_from']
-        salary_to = None
-    elif vacancy['payment_to'] and not vacancy['payment_from']:
+    if not vacancy['payment_from']:
         salary_from = None
-        salary_to = vacancy['payment_to']
-    avg_salary = predict_salary(salary_from, salary_to)
-    return avg_salary
+    if not vacancy['payment_to']:
+        salary_to = None
+    return salary_from, salary_to
 
 
 def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
@@ -74,11 +64,12 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
         }
         page = 0
         extra_pages = True
-        while extra_pages :
+        while extra_pages:
             sjob_payload['page'] = page
             vacancies = get_vacancies(sjob_api_url, sjob_payload, sjob_headers)
             for vacancy in vacancies['objects']:
-                avg_salary = predict_rub_salary_sj(vacancy)
+                salary_from, salary_to = predict_rub_salary_sj(vacancy)
+                avg_salary = predict_salary(salary_from, salary_to)
                 if avg_salary:
                     salary_in_vacancies.append(avg_salary)
             extra_pages = vacancies['more']
@@ -108,17 +99,18 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
             'area': '{}'.format(city_name),
             'page': '{}'.format(first_page_number)
         }
-        quantity_of_pages = 1
+        pages_number = 1
         page = 0
-        while page < quantity_of_pages:
+        while page < pages_number:
             hh_payload['page'] = page
             vacancies = get_vacancies(hh_api_url, hh_payload, hh_headers)
             for vacancy in vacancies['items']:
-                avg_salary = predict_rub_salary_hh(vacancy)
+                salary_from, salary_to = predict_rub_salary_hh(vacancy)
+                avg_salary = predict_salary(salary_from, salary_to)
                 if avg_salary:
                     salary_in_vacancies.append(avg_salary)
             page += 1
-            quantity_of_pages = vacancies['pages']
+            pages_number = vacancies['pages']
         if not len(salary_in_vacancies):
             average_salary = 0
         else:
