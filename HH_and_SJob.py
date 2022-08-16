@@ -126,7 +126,7 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
     return salary_analytics
 
 
-def render_vacancy_table(analytics, title):
+def make_table(analytics, title):
     vacancy_table = [
         [
             'Язык программирования',
@@ -135,15 +135,13 @@ def render_vacancy_table(analytics, title):
             'Средняя зарплата'
         ]
     ]
-    for key in analytics:
-        temp_salary_data = []
-        temp_salary_data.append(key)
-        temp_salary_data.append(analytics[key]['vacancies_found'])
-        temp_salary_data.append(analytics[key]['vacancies_processed'])
-        temp_salary_data.append(analytics[key]['average_salary'])
-        vacancy_table.append(temp_salary_data)
-        rendeted_vacancy_table = AsciiTable(vacancy_table, title)
-    return rendeted_vacancy_table
+    for language, language_analityc in analytics.items():
+        table_elements = []
+        table_elements.append(language)
+        table_elements.extend(language_analityc.values())
+        vacancy_table.append(table_elements)
+        vacancies_table = AsciiTable(vacancy_table, title)
+    return vacancies_table
 
 
 if __name__ == '__main__':
@@ -173,8 +171,8 @@ if __name__ == '__main__':
         sjob_analytics = get_analytics_from_sjob(languages, sjob_api_url, sjob_headers)
     except (requests.HTTPError, requests.ConnectionError) as e:
         quit('Получили ошибку: {} '.format(e))
-    rendered_vacancy_table_sj = render_vacancy_table(sjob_analytics, 'SuperJob Moscow')
-    print(rendered_vacancy_table_sj.table)
+    sjob_vacancies_table = make_table(sjob_analytics, 'SuperJob Moscow')
+    print(sjob_vacancies_table.table)
     print()
-    rendered_vacancy_table_hh = render_vacancy_table(hh_analytics, 'HeadHunter Moscow')
-    print(rendered_vacancy_table_hh.table)
+    hh_vacancies_table = make_table(hh_analytics, 'HeadHunter Moscow')
+    print(hh_vacancies_table.table)
