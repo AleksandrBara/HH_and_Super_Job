@@ -15,9 +15,9 @@ def predict_salary(salary_from, salary_to):
         avg_salary = None
     elif salary_from and salary_to:
         avg_salary = float(salary_from + salary_to) / 2
-    elif salary_from and not salary_to:
+    elif salary_from:
         avg_salary = float(salary_from) * 1.2
-    elif salary_to and not salary_from:
+    elif salary_to:
         avg_salary = float(salary_to) * 0.8
     return avg_salary
 
