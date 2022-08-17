@@ -22,40 +22,34 @@ def predict_salary(salary_from, salary_to):
     return avg_salary
 
 
-def predict_rub_salary_hh(vacancy):
-    if vacancy['salary']:
-        if vacancy['salary']['from']:
-            salary_from = vacancy['salary']['from']
-        if vacancy['salary']['to']:
-            salary_to = vacancy['salary']['to']
-        if not vacancy['salary']['to']:
-            salary_to = None
-        if not vacancy['salary']['from']:
-            salary_from = None
-        if vacancy['salary']['currency'] != 'RUR':
-            salary_from = None
-            salary_to = None
+def predict_rub_salary_for_hh(vacancy):
+    salary_from = None
+    salary_to = None
+    if not vacancy['salary']:
         return salary_from, salary_to
-    else:
-        return None, None
+    if vacancy['salary']['currency'] != 'RUR':
+        return salary_from, salary_to
+    if vacancy['salary']['from']:
+        salary_from = vacancy['salary']['from']
+    if vacancy['salary']['to']:
+        salary_to = vacancy['salary']['to']
+    return salary_from, salary_to
 
 
-def predict_rub_salary_sj(vacancy):
+def predict_rub_salary_for_sj(vacancy):
+    salary_from = None
+    salary_to = None
     if vacancy['payment_from']:
         salary_from = vacancy['payment_from']
     if vacancy['payment_to']:
         salary_to = vacancy['payment_to']
-    if not vacancy['payment_from']:
-        salary_from = None
-    if not vacancy['payment_to']:
-        salary_to = None
     return salary_from, salary_to
 
 
 def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
     salary_analytics = {}
     for language in languages:
-        salary = []
+        salaries = []
         sjob_payload = {
             'keywords': 'Программист {}'.format(language),
             'town': 'Москва',
@@ -68,18 +62,18 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
             sjob_payload['page'] = page
             vacancies = get_vacancies(sjob_api_url, sjob_payload, sjob_headers)
             for vacancy in vacancies['objects']:
-                salary_from, salary_to = predict_rub_salary_sj(vacancy)
+                salary_from, salary_to = predict_rub_salary_for_sj(vacancy)
                 avg_salary = predict_salary(salary_from, salary_to)
                 if avg_salary:
-                    salary.append(avg_salary)
+                    salaries.append(avg_salary)
             extra_pages = vacancies['more']
             page += 1
-        if not len(salary):
+        if not salaries:
             average_salary = 0
         else:
-            average_salary = int(sum(salary) / len(salary))
+            average_salary = int(sum(salaries) / len(salaries))
         vacancies_found = vacancies['total']
-        vacancies_processed = len(salary)
+        vacancies_processed = len(salaries)
         average_salary_analytics = {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
@@ -92,7 +86,7 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
 def get_analytics_from_hh(languages, hh_api_url, hh_headers):
     salary_analytics = {}
     for language in languages:
-        salary = []
+        salaries = []
         hh_payload = {
             'text': 'Программист {}'.format(language),
             'period': '{}'.format(period_of_searching),
@@ -105,18 +99,18 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
             hh_payload['page'] = page
             vacancies = get_vacancies(hh_api_url, hh_payload, hh_headers)
             for vacancy in vacancies['items']:
-                salary_from, salary_to = predict_rub_salary_hh(vacancy)
+                salary_from, salary_to = predict_rub_salary_for_hh(vacancy)
                 avg_salary = predict_salary(salary_from, salary_to)
                 if avg_salary:
-                    salary.append(avg_salary)
+                    salaries.append(avg_salary)
             page += 1
             pages_number = vacancies['pages']
-        if not len(salary):
+        if not salaries:
             average_salary = 0
         else:
-            average_salary = int(sum(salary) / len(salary))
+            average_salary = int(sum(salaries) / len(salaries))
         vacancies_found = vacancies['found']
-        vacancies_processed = len(salary)
+        vacancies_processed = len(salaries)
         average_salary_analytics = {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
