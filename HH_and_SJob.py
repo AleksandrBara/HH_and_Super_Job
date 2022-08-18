@@ -13,7 +13,7 @@ def get_vacancies(api_url, payload, headers):
 def predict_salary(salary_from, salary_to):
     if not salary_from and not salary_to:
         avg_salary = None
-    elif salary_from and salary_to:
+    if salary_from and salary_to:
         avg_salary = float(salary_from + salary_to) / 2
     elif salary_from:
         avg_salary = float(salary_from) * 1.2
@@ -23,27 +23,23 @@ def predict_salary(salary_from, salary_to):
 
 
 def predict_rub_salary_for_hh(vacancy):
-    salary_from = None
-    salary_to = None
     if not vacancy['salary']:
-        return salary_from, salary_to
+        return None
     if vacancy['salary']['currency'] != 'RUR':
-        return salary_from, salary_to
-    if vacancy['salary']['from']:
-        salary_from = vacancy['salary']['from']
-    if vacancy['salary']['to']:
-        salary_to = vacancy['salary']['to']
-    return salary_from, salary_to
+        return None
+    salary_from = vacancy['salary']['from']
+    salary_to = vacancy['salary']['to']
+    avg_salary = predict_salary(salary_from, salary_to)
+    return avg_salary
 
 
 def predict_rub_salary_for_sj(vacancy):
-    salary_from = None
-    salary_to = None
-    if vacancy['payment_from']:
-        salary_from = vacancy['payment_from']
-    if vacancy['payment_to']:
-        salary_to = vacancy['payment_to']
-    return salary_from, salary_to
+    salary_from = vacancy['payment_from']
+    salary_to = vacancy['payment_to']
+    if vacancy['currency'] != 'rub':
+        return None
+    avg_salary = predict_salary(salary_from, salary_to)
+    return avg_salary
 
 
 def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
@@ -62,8 +58,7 @@ def get_analytics_from_sjob(languages, sjob_api_url, sjob_headers):
             sjob_payload['page'] = page
             vacancies = get_vacancies(sjob_api_url, sjob_payload, sjob_headers)
             for vacancy in vacancies['objects']:
-                salary_from, salary_to = predict_rub_salary_for_sj(vacancy)
-                avg_salary = predict_salary(salary_from, salary_to)
+                avg_salary = predict_rub_salary_for_sj(vacancy)
                 if avg_salary:
                     salaries.append(avg_salary)
             extra_pages = vacancies['more']
@@ -99,8 +94,7 @@ def get_analytics_from_hh(languages, hh_api_url, hh_headers):
             hh_payload['page'] = page
             vacancies = get_vacancies(hh_api_url, hh_payload, hh_headers)
             for vacancy in vacancies['items']:
-                salary_from, salary_to = predict_rub_salary_for_hh(vacancy)
-                avg_salary = predict_salary(salary_from, salary_to)
+                avg_salary = predict_rub_salary_for_hh(vacancy)
                 if avg_salary:
                     salaries.append(avg_salary)
             page += 1
